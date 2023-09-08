@@ -1,6 +1,9 @@
+import com.canhub.purity.Versions
+
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
+    kotlin("plugin.serialization") version "1.9.10"
 }
 
 @OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
@@ -14,7 +17,7 @@ kotlin {
             }
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -28,7 +31,20 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                //put your multiplatform dependencies here
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutineCore}")
+                implementation("io.ktor:ktor-client-core:${Versions.ktorVersion}")
+                implementation("io.ktor:ktor-client-content-negotiation:${Versions.ktorVersion}")
+                implementation("io.ktor:ktor-serialization-kotlinx-json:${Versions.ktorVersion}")
+            }
+        }
+        val androidMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-android:${Versions.ktorVersion}")
+            }
+        }
+        val iosMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-darwin:${Versions.ktorVersion}")
             }
         }
         val commonTest by getting {
@@ -41,8 +57,8 @@ kotlin {
 
 android {
     namespace = "com.canhub.purity"
-    compileSdk = 33
+    compileSdk = com.canhub.purity.Versions.compileSdk
     defaultConfig {
-        minSdk = 26
+        minSdk = com.canhub.purity.Versions.minSdk
     }
 }

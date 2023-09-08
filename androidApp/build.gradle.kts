@@ -1,3 +1,5 @@
+import com.canhub.purity.Versions
+
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -5,19 +7,19 @@ plugins {
 
 android {
     namespace = "com.canhub.purity.android"
-    compileSdk = 33
+    compileSdk = Versions.compileSdk
     defaultConfig {
         applicationId = "com.canhub.purity.android"
-        minSdk = 26
-        targetSdk = 33
-        versionCode = 1
-        versionName = "1.0"
+        minSdk = Versions.minSdk
+        targetSdk = Versions.targetSdk
+        versionCode = Versions.versionCode
+        versionName = System.getProperty("user.name") ?: "dev-local"
     }
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.7"
+        kotlinCompilerExtensionVersion = "1.5.3"
     }
     packaging {
         resources {
@@ -40,10 +42,10 @@ android {
 
 dependencies {
     implementation(project(":shared"))
-    implementation("androidx.compose.ui:ui:1.4.3")
-    implementation("androidx.compose.ui:ui-tooling:1.4.3")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.4.3")
-    implementation("androidx.compose.foundation:foundation:1.4.3")
-    implementation("androidx.compose.material:material:1.4.3")
-    implementation("androidx.activity:activity-compose:1.7.1")
+    implementation("androidx.compose.ui:ui:${Versions.composeUi}")
+    implementation("androidx.compose.ui:ui-tooling:${Versions.composeUi}")
+    implementation("androidx.compose.ui:ui-tooling-preview:${Versions.composeUi}")
+    implementation("androidx.compose.foundation:foundation:${Versions.composeUi}")
+    implementation("androidx.compose.material:material:${Versions.composeUi}")
+    implementation("androidx.activity:activity-compose:${Versions.activityCompose}")
 }
