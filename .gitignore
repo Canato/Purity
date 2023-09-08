@@ -17,3 +17,6 @@ xcuserdata
 /.idea/assetWizardSettings.xml
 /build
 /captures
+
+# Detekt
+**/detekt-baseline.xml
