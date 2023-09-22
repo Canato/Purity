@@ -57,8 +57,8 @@ kotlin {
 
 android {
     namespace = "com.canhub.purity"
-    compileSdk = com.canhub.purity.Versions.compileSdk
+    compileSdk = Versions.compileSdk
     defaultConfig {
-        minSdk = com.canhub.purity.Versions.minSdk
+        minSdk = Versions.minSdk
     }
 }
