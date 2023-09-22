@@ -35,8 +35,6 @@ jobs:
           path: build/reports/detekt/
 
   android_unit_test_job:
-    env:
-      CI: "true"
     name: Android Unit Test
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -65,31 +63,16 @@ jobs:
         with:
           arguments: testDebugUnitTest
 
-  build_debug_job:
-    env:
-      CI: "true"
-    name: Build Phone Debug
+  build_android_job:
+    name: Build Android Debug
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Checkout the code
         uses: actions/checkout@v3
 
-      - name: Setup-java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Cache gradle files
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - name: Job set up
+        uses: ./.github/actions/job-set-up
 
       - name: Bump version
         uses: chkfung/android-version-actions@v1.2.1
@@ -99,12 +82,19 @@ jobs:
           versionName: PR-CI
 
       - name: Build Phone Debug
-        uses: gradle/gradle-build-action@v2.4.2
-        with:
-          arguments: assembleDebug
+        run: ./gradlew :androidApp:assembleDebug
 
-      - name: Upload Phone Debug Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-phone-debug
-          path: app/build/outputs/apk/phone/debug/app-debug.apk
+  build_ios_job:
+    name: Build iOS Debug
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Job set up
+        uses: ./.github/actions/job-set-up
+
+      - name: iOS set up
+        uses: ./.github/actions/ios-set-up
+
+      - run: xcodebuild build -workspace iosApp/iosApp.xcworkspace -configuration Debug -scheme iosApp -sdk iphoneos -destination name='iPhone 14' -verbose
