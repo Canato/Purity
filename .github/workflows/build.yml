@@ -26,12 +26,12 @@ jobs:
       - name: Job set up
         uses: ./.github/actions/job-set-up
 
-      - name: Bump version
-        uses: chkfung/android-version-actions@v1.2.1
-        with:
-          gradlePath: app/build.gradle.kts
-          versionCode: ${{ github.run_number }}
-          versionName: PR-CI
+#      - name: Bump version
+#        uses: chkfung/android-version-actions@v1.2.1
+#        with:
+#          gradlePath: app/build.gradle.kts
+#          versionCode: ${{ github.run_number }}
+#          versionName: PR-CI
 
       - name: Build Phone Debug
         run: ./gradlew :androidApp:assembleDebug
