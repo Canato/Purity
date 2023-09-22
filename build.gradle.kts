@@ -77,7 +77,7 @@ tasks.register<io.gitlab.arturbosch.detekt.Detekt>("detektAllModules") {
     description = "Runs a custom detekt build."
     autoCorrect = false
     setSource(files(projectDir))
-    config.setFrom(files("$rootDir/gradle/detekt/default-detekt-default-detekt-config.yml"))
+    config.setFrom(files("$rootDir/gradle/detekt/default-detekt-config.yml"))
     debug = true
     reports {
         xml { destination = file("build/reports/mydetekt.xml") }
