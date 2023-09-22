@@ -44,15 +44,10 @@ internal fun HomeComponent() {
     }
 }
 
-@Composable
-private fun GreetingView(text: String) {
-    Text(text = text)
-}
-
 //@Preview
-@Composable
-private fun DefaultPreview() {
-    MyApplicationTheme {
-        GreetingView("Hello, Android!")
-    }
-}
+//@Composable
+//private fun DefaultPreview() {
+//    MyApplicationTheme {
+//        GreetingView("Hello, Android!")
+//    }
+//}
