@@ -27,8 +27,7 @@ jobs:
       - run: ./gradlew clean testDebug -p androidApp/
 
   iOS:
-    #    if: ${{ inputs.shouldRunKmp == 'true' || inputs.shouldRunIos == 'true' }}
-    if: false
+    if: ${{ inputs.shouldRunKmp == 'true' || inputs.shouldRunIos == 'true' }}
     runs-on: macos-12
 
     steps:
@@ -37,10 +36,7 @@ jobs:
       - name: Job set up
         uses: ./.github/actions/job-set-up
 
-      - name: iOS set up
-        uses: ./.github/actions/ios-set-up
-
-      - run: xcodebuild build test -workspace iosApp/iosApp.xcworkspace -configuration Debug -scheme iosApp -sdk iphoneos -destination name='iPhone 14' -verbose
+      - run: xcodebuild build test -project iosApp/iosApp.xcodeproj -configuration Debug -scheme iosApp -sdk iphoneos -destination name='iPhone 14' -verbose
 
       - name: Upload logs
         if: always()
