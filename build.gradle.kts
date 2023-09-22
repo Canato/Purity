@@ -7,6 +7,7 @@ plugins {
     kotlin("android").version("1.9.10").apply(false)
     kotlin("multiplatform").version("1.8.21").apply(false)
     id("io.gitlab.arturbosch.detekt") version "1.23.1"
+    id("org.jetbrains.compose").version("1.5.1")
 }
 
 tasks.register("clean", Delete::class) {

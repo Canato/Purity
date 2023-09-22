@@ -1,4 +1,4 @@
-package com.canhub.purity.android
+package com.canhub.purity
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape

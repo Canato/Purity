@@ -42,10 +42,4 @@ android {
 
 dependencies {
     implementation(project(":shared"))
-    implementation("androidx.compose.ui:ui:${Versions.composeUi}")
-    implementation("androidx.compose.ui:ui-tooling:${Versions.composeUi}")
-    implementation("androidx.compose.ui:ui-tooling-preview:${Versions.composeUi}")
-    implementation("androidx.compose.foundation:foundation:${Versions.composeUi}")
-    implementation("androidx.compose.material:material:${Versions.composeUi}")
-    implementation("androidx.activity:activity-compose:${Versions.activityCompose}")
 }
