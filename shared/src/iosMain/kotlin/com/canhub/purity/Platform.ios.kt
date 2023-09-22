@@ -1,5 +1,6 @@
 package com.canhub.purity
 
+import androidx.compose.ui.window.ComposeUIViewController
 import platform.UIKit.UIDevice
 
 class IOSPlatform: Platform {
@@ -7,3 +8,5 @@ class IOSPlatform: Platform {
 }
 
 actual fun getPlatform(): Platform = IOSPlatform()
+
+fun HomeScreen() = ComposeUIViewController { HomeComponent() }
