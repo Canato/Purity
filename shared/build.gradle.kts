@@ -3,6 +3,7 @@ import com.canhub.purity.Versions
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
+    id("org.jetbrains.compose")
     kotlin("plugin.serialization") version "1.9.10"
 }
 
@@ -31,6 +32,12 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.ui)
+                implementation(compose.material)
+                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+                implementation(compose.components.resources)
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutineCore}")
                 implementation("io.ktor:ktor-client-core:${Versions.ktorVersion}")
                 implementation("io.ktor:ktor-client-content-negotiation:${Versions.ktorVersion}")
@@ -40,6 +47,7 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-android:${Versions.ktorVersion}")
+                api("androidx.activity:activity-compose:${Versions.activityCompose}")
             }
         }
         val iosMain by getting {
