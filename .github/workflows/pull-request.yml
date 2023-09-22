@@ -1,0 +1,110 @@
+name: Pull Request
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint_job:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v3
+
+      - name: Setup-java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Lint
+        uses: gradle/gradle-build-action@v2.4.2
+        with:
+          arguments: detektAllModules
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: lint-result
+          path: build/reports/detekt/
+
+  android_unit_test_job:
+    env:
+      CI: "true"
+    name: Android Unit Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v3
+
+      - name: Setup-java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Cache gradle files
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Android Modules Unit test
+        uses: gradle/gradle-build-action@v2.4.2
+        with:
+          arguments: testDebugUnitTest
+
+  build_debug_job:
+    env:
+      CI: "true"
+    name: Build Phone Debug
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v3
+
+      - name: Setup-java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Cache gradle files
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Bump version
+        uses: chkfung/android-version-actions@v1.2.1
+        with:
+          gradlePath: app/build.gradle.kts
+          versionCode: ${{ github.run_number }}
+          versionName: PR-CI
+
+      - name: Build Phone Debug
+        uses: gradle/gradle-build-action@v2.4.2
+        with:
+          arguments: assembleDebug
+
+      - name: Upload Phone Debug Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-phone-debug
+          path: app/build/outputs/apk/phone/debug/app-debug.apk
