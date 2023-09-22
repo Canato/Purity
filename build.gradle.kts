@@ -105,3 +105,20 @@ tasks.register<io.gitlab.arturbosch.detekt.Detekt>("detektAllModulesWithAutocorr
     exclude("**/build/**")
     exclude("**/androidTest/**")
 }
+
+tasks.register<Copy>("copyGitHooks") {
+    from("$rootDir/.github/git-hooks/") {
+        include("**/*.sh")
+        rename("(.*).sh", "$1")
+    }
+    into("$rootDir/.git/hooks")
+}
+
+tasks.register<Exec>("makeGitHooksExecutable") {
+    workingDir(rootDir)
+    commandLine("chmod")
+    args("-R", "+x", ".git/hooks/")
+    dependsOn("copyGitHooks")
+}
+
+tasks.findByPath(":androidApp:clean")?.dependsOn(":makeGitHooksExecutable")
