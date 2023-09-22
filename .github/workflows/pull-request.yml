@@ -42,6 +42,7 @@ jobs:
           path: build/reports/detekt/
 
   set_up_job:
+    name: SetUp
     runs-on: ubuntu-latest
     steps:
       - id: setVariables
@@ -69,6 +70,7 @@ jobs:
       shouldRunIos: "true" # ${{ steps.setVariables.outputs.shouldRunIos }}
 
   build_call_job:
+    name: Build
     needs: set_up_job
     uses: ./.github/workflows/build.yml
     with:
@@ -77,6 +79,7 @@ jobs:
       shouldRunIos: ${{ needs.set_up_job.outputs.shouldRunIos }}
 
   test_call_job:
+    name: Test
     needs: set_up_job
     uses: ./.github/workflows/test.yml
     with:
@@ -85,6 +88,7 @@ jobs:
       shouldRunIos: ${{ needs.set_up_job.outputs.shouldRunIos }}
 
   allow_merge_job:
+    name: AllowMerge
     if: always()
     runs-on: ubuntu-latest
     needs: [ build_call_job, test_call_job ]
