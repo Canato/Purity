@@ -1,6 +1,6 @@
 package com.canhub.purity
 
-class Greeting {
+internal class Greeting {
     private val platform: Platform = getPlatform()
 
     fun greet(): String {
