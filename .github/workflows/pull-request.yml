@@ -1,11 +1,18 @@
 name: Pull Request
 
-on:
-  pull_request:
-
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, ready_for_review, synchronize]
+    branches:
+      - main
 
 jobs:
   lint_job:
@@ -34,67 +41,59 @@ jobs:
           name: lint-result
           path: build/reports/detekt/
 
-  android_unit_test_job:
-    name: Android Unit Test
+  set_up_job:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     steps:
-      - name: Checkout the code
-        uses: actions/checkout@v3
+      - id: setVariables
+        name: Set variables
+        run: |
+          isFromMain=${{ github.ref == 'refs/heads/main' }}
+          isManual=${{ github.event_name == 'workflow_dispatch' }}
+          hasKmpLabel=${{ contains(github.event.pull_request.labels.*.name, 'KMP') }}
+          shouldRunKmp=false
+          if $isFromMain || $isManual || $hasKmpLabel ; then
+            shouldRunKmp=true
+          fi
+          echo "shouldRunKmp=$shouldRunKmp" >> "$GITHUB_OUTPUT"
+          echo "shouldRunAndroid=${{ contains(github.event.pull_request.labels.*.name, 'Android') }}" >> "$GITHUB_OUTPUT"
+          echo "shouldRunIos=${{ contains(github.event.pull_request.labels.*.name, 'iOS') }}" >> "$GITHUB_OUTPUT"
+          
+          if [ ${{ github.event_name }} == workflow_dispatch ] || [ ${{ github.event_name }} == push ] || ([ ${{ github.event_name }} == pull_request ] && [ ${{ github.event.pull_request.draft }} == false ]); then
+            exit 0
+          else
+            exit 1
+          fi
+    outputs:
+      shouldRunKmp: ${{ steps.setVariables.outputs.shouldRunKmp }}
+      shouldRunAndroid: ${{ steps.setVariables.outputs.shouldRunAndroid }}
+      shouldRunIos: ${{ steps.setVariables.outputs.shouldRunIos }}
 
-      - name: Setup-java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+  build_call_job:
+    needs: set_up_job
+    uses: ./.github/workflows/build.yml
+    with:
+      shouldRunKmp: ${{ needs.SetUp.outputs.shouldRunKmp }}
+      shouldRunAndroid: ${{ needs.SetUp.outputs.shouldRunAndroid }}
+      shouldRunIos: ${{ needs.SetUp.outputs.shouldRunIos }}
 
-      - name: Cache gradle files
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+  test_call_job:
+    needs: set_up_job
+    uses: ./.github/workflows/test.yml
+    with:
+      shouldRunKmp: ${{ needs.SetUp.outputs.shouldRunKmp }}
+      shouldRunAndroid: ${{ needs.SetUp.outputs.shouldRunAndroid }}
+      shouldRunIos: ${{ needs.SetUp.outputs.shouldRunIos }}
 
-      - name: Android Modules Unit test
-        uses: gradle/gradle-build-action@v2.4.2
-        with:
-          arguments: testDebugUnitTest
-
-  build_android_job:
-    name: Build Android Debug
+  allow_merge_job:
+    if: always()
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    needs: [ build_call_job, test_call_job ]
     steps:
-      - name: Checkout the code
-        uses: actions/checkout@v3
-
-      - name: Job set up
-        uses: ./.github/actions/job-set-up
-
-      - name: Bump version
-        uses: chkfung/android-version-actions@v1.2.1
-        with:
-          gradlePath: app/build.gradle.kts
-          versionCode: ${{ github.run_number }}
-          versionName: PR-CI
-
-      - name: Build Phone Debug
-        run: ./gradlew :androidApp:assembleDebug
-
-  build_ios_job:
-    name: Build iOS Debug
-    runs-on: macos-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Job set up
-        uses: ./.github/actions/job-set-up
-
-      - name: iOS set up
-        uses: ./.github/actions/ios-set-up
-
-      - run: xcodebuild build -workspace iosApp/iosApp.xcworkspace -configuration Debug -scheme iosApp -sdk iphoneos -destination name='iPhone 14' -verbose
+      - run: |
+          if [ ${{ github.event_name }} == pull_request ] && [ ${{ join(github.event.pull_request.labels.*.name) == '' }} == true ]; then
+            exit 1
+          elif [ ${{ (contains(needs.Build.result, 'failure')) }} == true ] || [ ${{ (contains(needs.UnitTests.result, 'failure')) }} == true ]; then
+            exit 1
+          else
+            exit 0
+          fi
