@@ -18,7 +18,7 @@ import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
-fun HomeComponent() {
+internal fun HomeComponent() {
     MyApplicationTheme {
         var greetingText by remember { mutableStateOf("Hello, World!") }
         var showImage by remember { mutableStateOf(false) }
@@ -45,13 +45,13 @@ fun HomeComponent() {
 }
 
 @Composable
-fun GreetingView(text: String) {
+private fun GreetingView(text: String) {
     Text(text = text)
 }
 
 //@Preview
 @Composable
-fun DefaultPreview() {
+private fun DefaultPreview() {
     MyApplicationTheme {
         GreetingView("Hello, Android!")
     }
